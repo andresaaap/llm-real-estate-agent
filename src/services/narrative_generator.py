@@ -2,7 +2,7 @@ import openai
 openai.api_base = "https://openai.vocareum.com/v1"
 
 # Define OpenAI API key 
-api_key = "voc-1354009781266772625640678169b5dd0837.90460331"
+api_key = os.getenv("OPENAI_API_KEY")
 openai.api_key = api_key
 
 class NarrativeGenerator:
@@ -15,9 +15,15 @@ class NarrativeGenerator:
     def generate_listings(self):
         # Logic to generate a real estate listing based on buyer preferences    
         prompt = """
-        Generate 10 real estate listings based on the following example and in the format of csv (comma-separated values) with the following columns: Neighborhood, Price, Bedrooms, Bathrooms, House Size, Description
+        Objective:
+        Generate 10 real estate listings based on the following example and in the format of csv (comma-separated values) with the following columns: Neighborhood, Price, Bedrooms, Bathrooms, House Size, Description.
 
-        Example:
+        Details:
+        Don't start each listing with the number, this is not a numbered list.
+        Don't end each listing with two or more newlines. Only one newline is allowed at the end of each listing.
+        Don't include: Neighborhood Description: or any other text that is not part of the listing.
+
+        Examples:
 
         Neighborhood,Price,Bedrooms,Bathrooms,House Size,Description
         Green OaksPrice, 800000, 3, 2, 2000, Welcome to this eco-friendly oasis nestled in the heart of Green Oaks. This charming 3-bedroom, 2-bathroom home boasts energy-efficient features such as solar panels and a well-insulated structure. Natural light floods the living spaces, highlighting the beautiful hardwood floors and eco-conscious finishes. The open-concept kitchen and dining area lead to a spacious backyard with a vegetable garden, perfect for the eco-conscious family. Embrace sustainable living without compromising on style in this Green Oaks gem.\nNeighborhood Description: Green Oaks is a close-knit, environmentally-conscious community with access to organic grocery stores, community gardens, and bike paths. Take a stroll through the nearby Green Oaks Park or grab a cup of coffee at the cozy Green Bean Cafe. With easy access to public transportation and bike lanes, commuting is a breeze.
