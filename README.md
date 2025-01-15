@@ -21,19 +21,30 @@ The LLM Real Estate Agent project leverages large language models and vector dat
 
 Create a virtual environment: Use the python -m venv command to create a virtual environment.
 
-python3 -m venv venv
+```
+python3 -m venv realstateagent
+```
 
 Activate the virtual environment: Activate the virtual environment using the following command:
-source venv/bin/activate
+
+```
+source realstateagent/bin/activate
+```
+
 3. Install the required dependencies:
    ```
    pip install -r requirements.txt
    ```
 
+4. Set environment variables:
+   ```
+   export OPENAI_API_KEY="your_api_key_here"
+   ```
+
 ## Usage
 To run the application, execute the following command:
 ```
-python src/main.py
+python src/HomeMatch.py
 ```
 Follow the prompts to input buyer preferences and generate personalized real estate narratives.
 
