@@ -1,4 +1,6 @@
 import openai
+import os
+
 openai.api_base = "https://openai.vocareum.com/v1"
 
 # Define OpenAI API key 
@@ -9,8 +11,13 @@ class NarrativeGenerator:
     def __init__(self):
         # Call the generate_listings method to generate real estate listings and store the response in the file
         # Listing.txt
-        with open("Listing.txt", "w") as file:
-            file.write(self.generate_listings())
+        relative_path = 'data/Listings.txt'
+        absolute_path = os.path.abspath(relative_path)
+        
+        # Check if the file exists and if it is empty
+        if not os.path.exists(absolute_path) or os.path.getsize(absolute_path) == 0:
+            with open(absolute_path, "w") as file:
+                file.write(self.generate_listings())
 
     def generate_listings(self):
         # Logic to generate a real estate listing based on buyer preferences    
