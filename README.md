@@ -19,21 +19,40 @@ The LLM Real Estate Agent project leverages large language models and vector dat
    cd llm-real-estate-agent
    ```
 
-Create a virtual environment: Use the python -m venv command to create a virtual environment.
+Install pyenv and pyenv-virtualenv:
 
 ```
-python3 -m venv realstateagent
+brew update
+brew install pyenv
+brew install pyenv-virtualenv
 ```
 
-Activate the virtual environment: Activate the virtual environment using the following command:
+Add the following lines to your shell profile (e.g., ~/.bash_profile, ~/.zshrc, ~/.profile, or ~/.bashrc):
 
 ```
-source realstateagent/bin/activate
+export PATH="$HOME/.pyenv/bin:$PATH"
+eval "$(pyenv init --path)"
+eval "$(pyenv init -)"
+eval "$(pyenv virtualenv-init -)"
+```
+
+Restart your shell:
+
+```
+source ~/.zshrc   # For zsh
+```
+
+Create and Activate Virtual Environment:
+
+```
+pyenv install 3.12.0  # Install the desired Python version if not already installed
+pyenv virtualenv 3.12.0 myproject-env
+pyenv activate myproject-env
 ```
 
 3. Install the required dependencies:
    ```
-   pip install -r requirements.txt
+   pip3 install -r requirements.txt
    ```
 
 4. Set environment variables:
