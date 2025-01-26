@@ -1,20 +1,13 @@
-class Listing:
-    def __init__(self, neighborhood, price, bedrooms, bathrooms, house_size, description, neighborhood_description):
-        self.neighborhood = neighborhood
-        self.price = price
-        self.bedrooms = bedrooms
-        self.bathrooms = bathrooms
-        self.house_size = house_size
-        self.description = description
-        self.neighborhood_description = neighborhood_description
+from lancedb.pydantic import LanceModel, Vector
+from lancedb.embeddings import get_registry
 
+embeddings = get_registry().get("openai").create()
 
-class Buyer:
-    def __init__(self, neighborhood, price, bedrooms, bathrooms, house_size):
-        self.preferences = {
-            "neighborhood": neighborhood,
-            "price": price,
-            "bedrooms": bedrooms,
-            "bathrooms": bathrooms,
-            "house_size": house_size
-        }
+class Listing(LanceModel):
+    vector: Vector(384)
+    neighborhood: str
+    price: int
+    bedrooms: int
+    bathrooms: int
+    house_size: int
+    description: str

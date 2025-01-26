@@ -1,3 +1,11 @@
 langchain
 openai==0.28.1
 lancedb
+torch
+torchvision
+sentence-transformers==2.5.1
+transformers==4.36.0
+pandas
+numpy
+pydantic
+pyarrow
