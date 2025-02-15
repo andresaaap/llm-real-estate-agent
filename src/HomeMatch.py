@@ -9,6 +9,7 @@ from src.models.model import Listing
 from src.services.narrative_generator import NarrativeGenerator
 from src.config.settings import get_settings
 from src.utils.embedding_utils import generate_embeddings
+from src.config.db_init import initialize_db
 
 def main():
     input_data = ["This is a test sentence.", "Here is another sentence."]
@@ -29,6 +30,15 @@ def main():
     print("Listings:")
     for listing in listings:
         print(listing)
+
+    table = initialize_db()
+    # Store the embeddings in the vector database
+    table.add(listings)
+    print("Listings added to the database.")
+    table.head().to_pandas()
+
+    # Perform a semantic search
+    print(table.search(listings[4].vector).limit(2).where("neighborhood='Mountain View Haven'").to_df())
 
 
 def collect_buyer_preferences():
