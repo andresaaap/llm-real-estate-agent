@@ -1,6 +1,7 @@
 # main.py
 import sys
 import os
+import streamlit as st
 
 # Add the src directory to the Python path
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
@@ -40,6 +41,31 @@ def main():
     # Perform a semantic search
     print(table.search(listings[4].vector).limit(2).where("neighborhood='Mountain View Haven'").to_df())
 
+def start_chat():
+    # Streamlit UI
+    st.title("Bedrock Chat Application")
+
+    # Initialize chat history
+    if "messages" not in st.session_state:
+        st.session_state.messages = []
+
+    # Display chat messages
+    for message in st.session_state.messages:
+        with st.chat_message(message["role"]):
+            st.markdown(message["content"])
+
+    # Chat input
+    if prompt := st.chat_input("What would you like to know?"):
+        st.session_state.messages.append({"role": "user", "content": prompt})
+        with st.chat_message("user"):
+            st.markdown(prompt)
+
+            response = "hola"
+        
+        # Display assistant response
+        with st.chat_message("assistant"):
+            st.markdown(response)
+        st.session_state.messages.append({"role": "assistant", "content": response})
 
 def collect_buyer_preferences():
     # This function would ideally collect preferences from user input
@@ -80,4 +106,10 @@ def read_listings_from_file(file_path, separator):
     return listings
 
 if __name__ == "__main__":
-    main()
+    if "initialized" not in st.session_state:
+        st.session_state.initialized = False
+    if not st.session_state.initialized:
+        main()
+        # Set the initialized flag to True
+        st.session_state.initialized = True
+    start_chat()

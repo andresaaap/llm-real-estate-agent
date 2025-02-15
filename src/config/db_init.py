@@ -22,7 +22,7 @@ def initialize_db():
         table = db.create_table("listings", schema=Listing)
         print("Table 'listings' created successfully.")
     else:
-        table = db.get_table("listings")
+        table = db.open_table("listings")
         print("Table 'listings' already exists.")
 
     return table
