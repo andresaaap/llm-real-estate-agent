@@ -25,7 +25,7 @@ def main():
     # Read listings from file
     relative_path = 'data/Listings.txt'
     absolute_path = os.path.abspath(relative_path)
-    listings = read_listings_from_file(absolute_path)
+    listings = read_listings_from_file(absolute_path, settings["LISTINGS_SEPARATOR"])
     print("Listings:")
     for listing in listings:
         print(listing)
@@ -42,14 +42,14 @@ def collect_buyer_preferences():
         "House Size": 1200
     }
 
-def read_listings_from_file(file_path):
+def read_listings_from_file(file_path, separator):
     listings = []
     with open(file_path, 'r') as file:
         line_count = 0
         for line in file:
             if line_count > 0:
                 # Assuming each line is a comma-separated value string
-                neighborhood, price, bedrooms, bathrooms, house_size, description = line.strip().split(',')
+                neighborhood, price, bedrooms, bathrooms, house_size, description = line.strip().split(separator)
                 listing_string = f"{neighborhood}, {price}, {bedrooms}, {bathrooms}, {house_size}, {description}"
                 print(listing_string)
 
