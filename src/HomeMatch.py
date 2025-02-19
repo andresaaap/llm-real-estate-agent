@@ -65,6 +65,9 @@ def start_chat():
     if "amenities" not in st.session_state:
         st.session_state.amenities = False
 
+    if "amenities_values" not in st.session_state:
+        st.session_state.amenities_values = False
+
     # Display chat messages
     for message in st.session_state.messages:
         with st.chat_message(message["role"]):
@@ -76,7 +79,7 @@ def start_chat():
         with st.chat_message("user"):
             st.markdown(prompt)
         
-        
+        user_input_classification = classify_user_input(prompt)
         
         ## Get the users preferences about neighborhood, price, bedrooms, bathrooms, and house size
         if st.session_state.neighborhood == False:
@@ -87,44 +90,10 @@ def start_chat():
 
         if st.session_state.neighborhood_values == False and st.session_state.neighborhood == True:
             # Logic to generate a real estate listing based on buyer preferences    
-            prompt_template_function_classification = f"""
-            Objective:
-            Classify the user input into the following categories: Neighborhood, Amenities, Important Decision Criteria, Other.
-
-            Details:
-            If the user input is a response for the question "What neighborhood, price, bedrooms, bathrooms and house size are you looking for?", classify it as Neighborhood.
-            If the user input is a response for the question "Which amenities would you like?", classify it as Amenities.
-            If the user input is a response for the question "What are 3 most important things for you in choosing this property?", classify it as Important Decision Criteria.
-            Otherwise, classify it as Other.
-
-            Examples:
-
-            I am looking for a house in Downtown with 2 bedrooms, 2 bathrooms, and a house size of 1200 sqft.
-            Neighborhood
-
-            User input:
-            {prompt}
-            """
-
-            response = openai.ChatCompletion.create(
-                messages=[
-                    {
-                        "role": "system",
-                        "content": prompt_template_function_classification
-                    }
-                ],
-                model="gpt-3.5-turbo",
-                temperature=1,
-                max_tokens=2000,
-                top_p=1,
-                frequency_penalty=0,
-                presence_penalty=0
-            )
-            print("Response:")
-            print(response.choices[0].message)
+            
             # If the user input is classified as Neighborhood
-            if "Neighborhood" in response.choices[0].message.content:
-                # Logic to generate a real estate listing based on buyer preferences    
+            if "Neighborhood" in user_input_classification:
+                # Logic to generate a real estate listing based on buyer preferences
                 prompt_template = f"""
                 Objective:
                 Extract the neighborhood, price, number of bedrooms, number of bathrooms and house size from the following text and output the values in the format: Neighborhood,Price,Bedrooms,Bathrooms,House Size.
@@ -142,37 +111,39 @@ def start_chat():
                 Text:
                 {prompt}
                 """
-                
-                response = openai.ChatCompletion.create(
-                    messages=[
-                        {
-                            "role": "system",
-                            "content": "You are a real estate agent looking to extract relevant information from potential buyers."
-                        },
-                        {
-                            "role": "user",
-                            "content": prompt_template
-                        }
-                    ],
-                    model="gpt-3.5-turbo",
-                    temperature=1,
-                    max_tokens=2000,
-                    top_p=1,
-                    frequency_penalty=0,
-                    presence_penalty=0
-                )
-                print("Response:")
-                print(response.choices[0].message)
+                extract_data = extract_information_from_user_input(prompt_template, prompt)
                 st.session_state.neighborhood_values = True
 
-            
-
         ## Get the users prefences related to amenities
-        if "amenities" not in st.session_state and st.session_state.neighborhood_values == True:
+        if st.session_state.amenities == False and st.session_state.neighborhood_values == True:
             with st.chat_message("assistant"):
                 st.markdown("Which amenities would you like?")
                 st.session_state.amenities = True
                 st.session_state.messages.append({"role": "assistant", "content": "Which amenities would you like?"})
+
+        if st.session_state.amenities_values == False and st.session_state.amenities == True:
+            # Logic to generate a real estate listing based on buyer preferences    
+            
+            # If the user input is classified as Neighborhood
+            if "Amenities" in user_input_classification:
+                # Logic to generate a real estate listing based on buyer preferences
+                prompt_template = f"""
+                Objective:
+                Extract the amenities from the following text.
+
+                Details:
+                The amenities are separated by commas.
+                The amenities are strings.
+
+                Examples:
+
+                overlooking the golf course, luxurious master suite, home theater, outdoor kitchen, golfing
+
+                Text:
+                {prompt}
+                """
+                extract_data = extract_information_from_user_input(prompt_template, prompt)
+                st.session_state.amenities_values = True
 
         ## Get the users preferences related to 3 most important things when making the decision
         #if "important_decision_criteria" not in st.session_state:
@@ -182,6 +153,69 @@ def start_chat():
         #        st.session_state.messages.append({"role": "assistant", "content": "What are 3 most important things for you in choosing this property?"})
         
         # Display assistant response
+
+def extract_information_from_user_input(prompt_template, user_input):
+    # Format the prompt_template with the user_input
+    formatted_prompt = prompt_template.format(prompt=user_input)
+    
+    response = openai.ChatCompletion.create(
+        messages=[
+            {
+                "role": "system",
+                "content": "You are a real estate agent looking to extract relevant information from potential buyers."
+            },
+            {
+                "role": "user",
+                "content": formatted_prompt
+            }
+        ],
+        model="gpt-3.5-turbo",
+        temperature=1,
+        max_tokens=2000,
+        top_p=1,
+        frequency_penalty=0,
+        presence_penalty=0
+    )
+
+    return response.choices[0].message.content
+
+def classify_user_input(user_input):
+    prompt_template_function_classification = f"""
+    Objective:
+    Classify the user input into the following categories: Neighborhood, Amenities, Important Decision Criteria, Other.
+
+    Details:
+    If the user input is a response for the question "What neighborhood, price, bedrooms, bathrooms and house size are you looking for?", classify it as Neighborhood.
+    If the user input is a response for the question "Which amenities would you like?", classify it as Amenities.
+    If the user input is a response for the question "What are 3 most important things for you in choosing this property?", classify it as Important Decision Criteria.
+    Otherwise, classify it as Other.
+
+    Examples:
+
+    I am looking for a house in Downtown with 2 bedrooms, 2 bathrooms, and a house size of 1200 sqft.
+    Neighborhood
+
+    User input:
+    {user_input}
+    """
+
+    response = openai.ChatCompletion.create(
+        messages=[
+            {
+                "role": "system",
+                "content": prompt_template_function_classification
+            }
+        ],
+        model="gpt-3.5-turbo",
+        temperature=1,
+        max_tokens=2000,
+        top_p=1,
+        frequency_penalty=0,
+        presence_penalty=0
+    )
+    
+    return response.choices[0].message.content
+
 
 def collect_buyer_preferences():
     # This function would ideally collect preferences from user input
