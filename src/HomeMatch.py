@@ -13,7 +13,7 @@ openai.api_key = api_key
 # Add the src directory to the Python path
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
-from src.models.model import Listing
+from src.models.model import Listing, BuyerPreferences
 from src.services.narrative_generator import NarrativeGenerator
 from src.config.settings import get_settings
 from src.utils.embedding_utils import generate_embeddings
@@ -111,8 +111,9 @@ def start_chat():
                 Text:
                 {prompt}
                 """
-                extract_data = extract_information_from_user_input(prompt_template, prompt)
+                extract_data_neighborhood = extract_information_from_user_input(prompt_template, prompt)
                 st.session_state.neighborhood_values = True
+                st.session_state.data_neighborhood = extract_data_neighborhood
 
         ## Get the users prefences related to amenities
         if st.session_state.amenities == False and st.session_state.neighborhood_values == True:
@@ -142,8 +143,24 @@ def start_chat():
                 Text:
                 {prompt}
                 """
-                extract_data = extract_information_from_user_input(prompt_template, prompt)
+                extract_data_amenities = extract_information_from_user_input(prompt_template, prompt)
                 st.session_state.amenities_values = True
+                st.session_state.data_amenities = extract_data_amenities
+
+            # if neighborhood_values and amenities_values are True, then use them to create the buyer preferences
+            if st.session_state.neighborhood_values == True and st.session_state.amenities_values == True:
+                data_neighborhood_split = st.session_state.data_neighborhood.split(",")
+                # Logic to generate a real estate listing based on buyer preferences
+                buyer_preferences = BuyerPreferences(
+                    neighborhood=data_neighborhood_split[0],
+                    price=data_neighborhood_split[1],
+                    bedrooms=data_neighborhood_split[2],
+                    bathrooms=data_neighborhood_split[3],
+                    house_size=data_neighborhood_split[4],
+                    amenities=st.session_state.data_amenities,
+                    priorities="safe neighborhood, close to a mall, classic style home"
+                )
+                print(buyer_preferences)
 
         ## Get the users preferences related to 3 most important things when making the decision
         #if "important_decision_criteria" not in st.session_state:
