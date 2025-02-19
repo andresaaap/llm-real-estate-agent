@@ -2,6 +2,13 @@
 import sys
 import os
 import streamlit as st
+import openai
+
+openai.api_base = "https://openai.vocareum.com/v1"
+
+# Define OpenAI API key 
+api_key = os.getenv("OPENAI_API_KEY")
+openai.api_key = api_key
 
 # Add the src directory to the Python path
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
@@ -48,6 +55,15 @@ def start_chat():
     # Initialize chat history
     if "messages" not in st.session_state:
         st.session_state.messages = []
+    
+    if "neighborhood" not in st.session_state:
+        st.session_state.neighborhood = False
+
+    if "neighborhood_values" not in st.session_state:
+        st.session_state.neighborhood_values = False
+
+    if "amenities" not in st.session_state:
+        st.session_state.amenities = False
 
     # Display chat messages
     for message in st.session_state.messages:
@@ -59,13 +75,71 @@ def start_chat():
         st.session_state.messages.append({"role": "user", "content": prompt})
         with st.chat_message("user"):
             st.markdown(prompt)
+        
+        
+        
+        ## Get the users preferences about neighborhood, price, bedrooms, bathrooms, and house size
+        if st.session_state.neighborhood == False:
+            with st.chat_message("assistant"):
+                st.markdown("What neighborhood, price, bedrooms, bathrooms and house size are you looking for?")
+                st.session_state.neighborhood = True
+                st.session_state.messages.append({"role": "assistant", "content": "What neighborhood, price, bedrooms, bathrooms and house size are you looking for?"})
 
-            response = "hola"
+        if st.session_state.neighborhood_values == False and st.session_state.neighborhood == True:
+            # Logic to generate a real estate listing based on buyer preferences    
+            prompt_template_function_classification = f"""
+            Objective:
+            Classify the user input into the following categories: Neighborhood, Amenities, Important Decision Criteria, Other.
+
+            Details:
+            If the user input is a response for the question "What neighborhood, price, bedrooms, bathrooms and house size are you looking for?", classify it as Neighborhood.
+            If the user input is a response for the question "Which amenities would you like?", classify it as Amenities.
+            If the user input is a response for the question "What are 3 most important things for you in choosing this property?", classify it as Important Decision Criteria.
+            Otherwise, classify it as Other.
+
+            Examples:
+
+            I am looking for a house in Downtown with 2 bedrooms, 2 bathrooms, and a house size of 1200 sqft.
+            Neighborhood
+
+            User input:
+            {prompt}
+            """
+
+            response = openai.ChatCompletion.create(
+                messages=[
+                    {
+                        "role": "system",
+                        "content": prompt_template_function_classification
+                    }
+                ],
+                model="gpt-3.5-turbo",
+                temperature=1,
+                max_tokens=2000,
+                top_p=1,
+                frequency_penalty=0,
+                presence_penalty=0
+            )
+            print("Response:")
+            print(response.choices[0].message)
+
+            
+
+        ## Get the users prefences related to amenities
+        if "amenities" not in st.session_state and st.session_state.neighborhood_values == True:
+            with st.chat_message("assistant"):
+                st.markdown("Which amenities would you like?")
+                st.session_state.amenities = True
+                st.session_state.messages.append({"role": "assistant", "content": "Which amenities would you like?"})
+
+        ## Get the users preferences related to 3 most important things when making the decision
+        #if "important_decision_criteria" not in st.session_state:
+        #    with st.chat_message("assistant"):
+        #        st.markdown("What are 3 most important things for you in choosing this property?")
+        #        st.session_state.important_decision_criteria = True
+        #        st.session_state.messages.append({"role": "assistant", "content": "What are 3 most important things for you in choosing this property?"})
         
         # Display assistant response
-        with st.chat_message("assistant"):
-            st.markdown(response)
-        st.session_state.messages.append({"role": "assistant", "content": response})
 
 def collect_buyer_preferences():
     # This function would ideally collect preferences from user input
