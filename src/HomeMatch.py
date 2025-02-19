@@ -17,7 +17,7 @@ from src.models.model import Listing, BuyerPreferences
 from src.services.narrative_generator import NarrativeGenerator
 from src.config.settings import get_settings
 from src.utils.embedding_utils import generate_embeddings
-from src.config.db_init import initialize_db
+from src.config.db_init import initialize_db, get_db_table
 
 def main():
     input_data = ["This is a test sentence.", "Here is another sentence."]
@@ -161,6 +161,12 @@ def start_chat():
                     priorities="safe neighborhood, close to a mall, classic style home"
                 )
                 print(buyer_preferences)
+                table = get_db_table()
+                # Generate embeddings for the buyer preferences
+                buyer_preferences_vector = generate_embeddings(str(buyer_preferences))
+                # Perform a semantic search
+                search_results = table.search(buyer_preferences_vector).limit(2).where(f"neighborhood='{buyer_preferences.neighborhood}'").to_df()
+                print(search_results)
 
         ## Get the users preferences related to 3 most important things when making the decision
         #if "important_decision_criteria" not in st.session_state:
