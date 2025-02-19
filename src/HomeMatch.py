@@ -122,6 +122,48 @@ def start_chat():
             )
             print("Response:")
             print(response.choices[0].message)
+            # If the user input is classified as Neighborhood
+            if "Neighborhood" in response.choices[0].message.content:
+                # Logic to generate a real estate listing based on buyer preferences    
+                prompt_template = f"""
+                Objective:
+                Extract the neighborhood, price, number of bedrooms, number of bathrooms and house size from the following text and output the values in the format: Neighborhood,Price,Bedrooms,Bathrooms,House Size.
+
+                Details:
+                bedrooms, bathrooms, and house size are integers.
+                price is an integer.
+                Neighborhood is a string.
+                The values are separated by commas.
+
+                Examples:
+
+                Bel Air,1000000,5,4,3000
+
+                Text:
+                {prompt}
+                """
+                
+                response = openai.ChatCompletion.create(
+                    messages=[
+                        {
+                            "role": "system",
+                            "content": "You are a real estate agent looking to extract relevant information from potential buyers."
+                        },
+                        {
+                            "role": "user",
+                            "content": prompt_template
+                        }
+                    ],
+                    model="gpt-3.5-turbo",
+                    temperature=1,
+                    max_tokens=2000,
+                    top_p=1,
+                    frequency_penalty=0,
+                    presence_penalty=0
+                )
+                print("Response:")
+                print(response.choices[0].message)
+                st.session_state.neighborhood_values = True
 
             
 
