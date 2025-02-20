@@ -187,6 +187,8 @@ def start_chat():
 
                 Details:
                 Ensure that the augmentation process enhances the appeal of the listing without altering factual information.
+                Ensure that the formatting of the output is clear and easy to read. Add line breaks between each listing.
+                Add bullet points to each listing to make the information easier to digest.
 
                 Listing search results:
                 {listing_results}
