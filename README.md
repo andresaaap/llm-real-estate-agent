@@ -73,7 +73,7 @@ The real estate listings can be found in the `data/Listings.txt` file.
 
 The following is a demo video of the application:
 
-[![Demo Video](https://img.youtube.com/vi/1Q2Jv1Z2Z1U/0.jpg)](https://youtu.be/aF_hqQUwjlk)
+[![Demo Video](https://i9.ytimg.com/vi/aF_hqQUwjlk/mqdefault.jpg?sqp=CJTc3r0G-oaymwEmCMACELQB8quKqQMa8AEB-AHUBoAC2AOKAgwIABABGGUgZShlMA8=&rs=AOn4CLBNbRGYqVSzBkSZXE5tXwvqO2tTxQ)](https://youtu.be/aF_hqQUwjlk)
 
 ## Contributing
 Contributions are welcome! Please open an issue or submit a pull request for any enhancements or bug fixes.
