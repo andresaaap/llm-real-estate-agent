@@ -55,6 +55,9 @@ def start_chat():
     # Initialize chat history
     if "messages" not in st.session_state:
         st.session_state.messages = []
+
+    if "welcome" not in st.session_state:
+        st.session_state.welcome = False
     
     if "neighborhood" not in st.session_state:
         st.session_state.neighborhood = False
@@ -73,8 +76,10 @@ def start_chat():
         with st.chat_message(message["role"]):
             st.markdown(message["content"])
 
-    st.markdown("Welcome to the Real Estate Agent AI! I can help you find the perfect home")
-    st.session_state.messages.append({"role": "assistant", "content": "Welcome to the Real Estate Agent AI! I can help you find the perfect home"})
+    if st.session_state.welcome == False:
+        st.markdown("Welcome to the Real Estate Agent AI! I can help you find the perfect home")
+        st.session_state.messages.append({"role": "assistant", "content": "Welcome to the Real Estate Agent AI! I can help you find the perfect home"})
+        st.session_state.welcome = True
 
     if st.session_state.neighborhood == False:
         with st.chat_message("assistant"):
@@ -167,8 +172,54 @@ def start_chat():
                 # Generate embeddings for the buyer preferences
                 buyer_preferences_vector = generate_embeddings(str(buyer_preferences))
                 # Perform a semantic search
-                search_results = table.search(buyer_preferences_vector).limit(3).to_df()
-                print(search_results)
+                search_results = table.search(buyer_preferences_vector).limit(1).to_df()
+                
+                # For each element in the search results, add the description to the listing_results
+                listing_results = []
+                for index, row in search_results.iterrows():
+                    listing_results.append(f"Neighborhood: {row['neighborhood']}, Price: {row['price']}, Bedrooms: {row['bedrooms']}, Bathrooms: {row['bathrooms']}, House Size: {row['house_size']}, Description: {row['description']}")
+
+                prompt_template_listing_results = f"""
+                Objective:
+                Return the results of the search of real state listing that are the closest to the buyer's prefenrences.
+                For each retrieved listing augment the description, tailoring it to resonate with the buyer’s specific preferences. 
+                This involves subtly emphasizing aspects of the property that align with what the buyer is looking for.
+
+                Details:
+                Ensure that the augmentation process enhances the appeal of the listing without altering factual information.
+
+                Listing search results:
+                {listing_results}
+
+                Examples:
+
+                Listing 1:
+                Neighborhood: Downtown
+                Price: $500,000
+                Bedrooms: 2
+                Bathrooms: 2
+                House Size: 1200 sqft
+                Description: This charming home is located in the heart of Downtown. It features 2 bedrooms, 2 bathrooms, and a cozy living room. The house is perfect for a small family or a couple looking for a cozy retreat.
+                """
+
+                response = openai.ChatCompletion.create(
+                    messages=[
+                        {
+                            "role": "system",
+                            "content": prompt_template_listing_results
+                        }
+                    ],
+                    model="gpt-3.5-turbo",
+                    temperature=1,
+                    max_tokens=2000,
+                    top_p=1,
+                    frequency_penalty=0,
+                    presence_penalty=0
+                )
+
+                with st.chat_message("assistant"):
+                    st.markdown(response.choices[0].message.content)
+                    st.session_state.messages.append({"role": "assistant", "content": response.choices[0].message.content})
 
         ## Get the users preferences related to 3 most important things when making the decision
         #if "important_decision_criteria" not in st.session_state:
