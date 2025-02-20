@@ -50,7 +50,7 @@ def main():
 
 def start_chat():
     # Streamlit UI
-    st.title("Bedrock Chat Application")
+    st.title("Real Estate Agent AI")
 
     # Initialize chat history
     if "messages" not in st.session_state:
@@ -73,6 +73,15 @@ def start_chat():
         with st.chat_message(message["role"]):
             st.markdown(message["content"])
 
+    st.markdown("Welcome to the Real Estate Agent AI! I can help you find the perfect home")
+    st.session_state.messages.append({"role": "assistant", "content": "Welcome to the Real Estate Agent AI! I can help you find the perfect home"})
+
+    if st.session_state.neighborhood == False:
+        with st.chat_message("assistant"):
+            st.markdown("What neighborhood, price, bedrooms, bathrooms and house size are you looking for?")
+            st.session_state.neighborhood = True
+            st.session_state.messages.append({"role": "assistant", "content": "What neighborhood, price, bedrooms, bathrooms and house size are you looking for?"})
+
     # Chat input
     if prompt := st.chat_input("What would you like to know?"):
         st.session_state.messages.append({"role": "user", "content": prompt})
@@ -80,13 +89,6 @@ def start_chat():
             st.markdown(prompt)
         
         user_input_classification = classify_user_input(prompt)
-        
-        ## Get the users preferences about neighborhood, price, bedrooms, bathrooms, and house size
-        if st.session_state.neighborhood == False:
-            with st.chat_message("assistant"):
-                st.markdown("What neighborhood, price, bedrooms, bathrooms and house size are you looking for?")
-                st.session_state.neighborhood = True
-                st.session_state.messages.append({"role": "assistant", "content": "What neighborhood, price, bedrooms, bathrooms and house size are you looking for?"})
 
         if st.session_state.neighborhood_values == False and st.session_state.neighborhood == True:
             # Logic to generate a real estate listing based on buyer preferences    
@@ -165,7 +167,7 @@ def start_chat():
                 # Generate embeddings for the buyer preferences
                 buyer_preferences_vector = generate_embeddings(str(buyer_preferences))
                 # Perform a semantic search
-                search_results = table.search(buyer_preferences_vector).limit(2).where(f"neighborhood='{buyer_preferences.neighborhood}'").to_df()
+                search_results = table.search(buyer_preferences_vector).limit(3).to_df()
                 print(search_results)
 
         ## Get the users preferences related to 3 most important things when making the decision
