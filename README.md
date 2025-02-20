@@ -63,15 +63,17 @@ pyenv activate myproject-env
 ## Usage
 To run the application, execute the following command:
 ```
-python src/HomeMatch.py
+streamlit run src/HomeMatch.py
 ```
 Follow the prompts to input buyer preferences and generate personalized real estate narratives.
 
-## Testing
-To run the unit tests, use the following command:
-```
-pytest tests/
-```
+## Reviewing instructions
+
+The real estate listings can be found in the `data/Listings.txt` file.
+
+The following is a demo video of the application:
+
+[![Demo Video](https://img.youtube.com/vi/1Q2Jv1Z2Z1U/0.jpg)](https://youtu.be/aF_hqQUwjlk)
 
 ## Contributing
 Contributions are welcome! Please open an issue or submit a pull request for any enhancements or bug fixes.
